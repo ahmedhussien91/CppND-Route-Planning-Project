@@ -33,9 +33,19 @@ float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
 // - For each node in current_node.neighbors, add the neighbor to open_list and set the node's visited attribute to true.
 
 void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
-     
-}
+    current_node->FindNeighbors();
+    for (auto neighbor : current_node->neighbors) {
+        neighbor->parent = current_node;
+        neighbor->g_value = current_node->distance(*start_node);
+        neighbor->h_value = CalculateHValue(neighbor);
+        neighbor->g_h_sum = neighbor->h_value + neighbor->g_value;
+        open_list.push_back(neighbor);
+    }
 
+}
+bool RoutePlanner::Compare(RouteModel::Node * x1, RouteModel::Node * x2) {
+    return (x1->g_h_sum > x2->g_h_sum);
+}
 
 // TODO 5: Complete the NextNode method to sort the open list and return the next node.
 // Tips:
@@ -43,9 +53,11 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 // - Create a pointer to the node in the list with the lowest sum.
 // - Remove that node from the open_list.
 // - Return the pointer.
-
 RouteModel::Node *RoutePlanner::NextNode() {
-
+    std::sort(open_list.begin(), open_list.end(), Compare);
+    auto lowest_sum_node = open_list.back();
+    open_list.pop_back();
+    return lowest_sum_node;
 }
 
 
