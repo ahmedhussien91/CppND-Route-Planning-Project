@@ -80,16 +80,21 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
         path_found.emplace(path_found.begin(),*current_node);
         distance += current_node->distance(*current_node->parent);
         current_node = current_node->parent;
+      	std::cout << "ConstructFinalPath current node: " << current_node->x << ", " << current_node->y << "\n"; 
     }
     // add the last node
     path_found.emplace(path_found.begin(),*current_node);
-    distance += current_node->distance(*current_node->parent);
+    //distance += current_node->distance(*current_node->parent);
 
     distance *= m_Model.MetricScale(); // Multiply the distance by the scale of the map to get meters.
     return path_found;
 
 }
 
+bool AreSame(float a, float b)
+{
+    return fabs(a - b) < __FLT_EPSILON__;
+}
 
 // TODO 7: Write the A* Search algorithm here.
 // Tips:
@@ -100,7 +105,30 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
 
 void RoutePlanner::AStarSearch() {
     RouteModel::Node *current_node = nullptr;
+	
 
+    std::cout << "start node: " << start_node->x << ", " << start_node->y << ", " << start_node->parent << std::endl;
+    std::cout << "end node: " << end_node->x << end_node->y << std::endl;
+    start_node->visited = true;
+    open_list.push_back(start_node);
+      
     // TODO: Implement your solution here.
-
+  	while(open_list.size() > 0) {
+      current_node = NextNode(); 
+      std::cout << "Searching path current node: " << current_node->x << ", " << current_node->y << "\n"; 
+      if (AreSame(current_node->x, end_node->x) && AreSame(current_node->y, end_node->y)) {
+        std::cout << "path found\n";
+        m_Model.path = ConstructFinalPath(current_node);
+        break;
+      } 
+  	  AddNeighbors(current_node);
+    }
+  	if(current_node == nullptr) {
+      // no path found
+      std::cout << "no path found \n"; 
+    }
+  	else { 
+      std::cout << "out without going into constructFinalPath \n";
+    }
+      
 }
